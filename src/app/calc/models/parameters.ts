@@ -7,5 +7,8 @@ export class Parameters {
     public K:number;
     public N:number;
     public view:string;
+    public T:number;
+    public UOM:string;
+    public delta_t:number;
 
 }

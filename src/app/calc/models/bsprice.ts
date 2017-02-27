@@ -1,6 +1,8 @@
 import { Option } from "./option";
 import { Parameters } from "./parameters";
 
+declare var math:any; // Magic
+
 export class BSPrice {
 
     public o:Option;

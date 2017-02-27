@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, OnChanges, SimpleChange, DoCheck, KeyValueDiffers } from '@angular/core';
+import { Component, OnInit, Input, OnChanges, SimpleChange, DoCheck, KeyValueDiffers, NgZone, ChangeDetectorRef,ChangeDetectionStrategy } from '@angular/core';
 import { BinTree } from "../models/bintree";
 import { Parameters } from "../models/parameters";
 
@@ -9,53 +9,100 @@ declare var d3:any;
 @Component({
     selector: 'app-binominaltree',
     template: `
-    <h2>Price Evolution</h2>
+    <h2>{{callprice}} = {{price}}</h2>
+ 
+  <table class="table table-striped">
+    <tbody>
+      <tr>
+        <td><h2> $ {{tex_q}} $ </h2></td>
+        <td><h2>{{q}}</h2></td>
+      </tr>
+
+      <tr>
+        <td><h2>{{tex_up}}</h2></td>
+        <td><h2>{{up}}</h2></td>
+      </tr>
+
+      <tr>
+        <td><h2>{{tex_down}}</h2></td>
+        <td><h2>{{down}}</h2></td>
+      </tr>
+
+      <tr>
+        <td><h2>{{tex_delta_t}}</h2></td>
+        <td><h2>{{delta_t}}</h2></td>
+      </tr>
+
+
+      <tr>
+        <td><h2>{{callprice}}</h2></td>
+        <td><h2>{{price}}</h2></td>
+      </tr>
+
+    </tbody>
+  </table>
     <div id="binominaltree"></div>
-    <h2>$q=\\alpha$</h2>
-    <h2>{{myeqn}}</h2>
-    <h2>{{callprice}}</h2>
-    <h2>Risk neutral probability q = {{q}}</h2>
-  `
+  `,
+
+
+
+    // <thead>
+    //   <tr>
+    //     <th>sss</th>
+    //     <th>Lastname</th>
+    //   </tr>
+    // </thead>
+
+  changeDetection: ChangeDetectionStrategy.Default
 })
 
 export class BinominalmodelComponent implements OnInit {
 
     @Input() p: Parameters;
-    // @Input() N: number;
-    // @Input() S0: number;
-    // @Input() K: number;
-    // @Input() up: number;
-    // @Input() down: number;
-    // @Input() view: string;
 
 	differ: any;
+    // changeDetectorRefs:ChangeDetectorRef[] = [];
 
 	constructor(private differs: KeyValueDiffers) {
 		this.differ = differs.find({}).create(null);
-                this.bintree = new BinTree();
-
+        this.bintree = new BinTree();
 	}
 
-    myeqn:string = "$q = \\frac{e^{r t}-u}{u-d}$";
-    callprice:string ="$c=e^{-rt}(q P_u+(1-q)P_d)$";
+
+    tex_q:string;
+    callprice:string ="$c=e^{-r t}(q P_u+(1-q)P_d)$";
+    tex_delta_t:string = "$\\Delta t =$";
+    price:number = 2.3;
     bintree:BinTree;
     q:number;
+    up:number;
+    tex_up:string="$u=e^{\\sigma \\sqrt{t} }$";
+    down:number;
+    tex_down:string="$u=e^{-\\sigma \\sqrt{t} }$";
+    delta_t:number;
 
+
+    calc_values() {
+        this.delta_t = math.round(this.p.T/this.p.N,2);
+        this.up = math.round(math.exp(this.p.sigma*math.sqrt(this.p.T)),2);
+        this.down = math.round(math.exp(this.p.sigma*math.sqrt(this.p.T)),2);        
+        console.log('Recalculating values',this.delta_t);
+        this.q = math.round(this.bintree.q_prob(this.p.r, this.delta_t, this.p.sigma),2);
+    }
 
 
     ngOnInit() {
+        this.tex_up = "$u=e^{\\sigma \\sqrt{t} }$"
+        this.tex_q = "q = \\frac{e^{r \\Delta t}-u}{u-d}";
 
-        var delta_t = 0.1;
-        this.q = math.round(this.bintree.q_prob(this.p.r, delta_t, this.p.sigma),2);
-
-
+        this.calc_values();
         this.update();
-        MathJax.Hub.Typeset();
-             setTimeout(() => {
-          console.log('finished loading');
-          MathJax.Hub.Typeset();
-            // run jQuery stuff here
-        }, 0);
+        // MathJax.Hub.Typeset();
+        // setTimeout(() => {
+        //     console.log('finished loading');
+        //   MathJax.Hub.Typeset();
+        //     // run jQuery stuff here
+        // }, 0);
 
     // ngOnInit() {
     //   setTimeout(() => {
@@ -76,30 +123,47 @@ export class BinominalmodelComponent implements OnInit {
 			changes.forEachChangedItem(r => console.log('changed ', r.currentValue));
 			changes.forEachAddedItem(r => console.log('added ' + r.currentValue));
 			changes.forEachRemovedItem(r => console.log('removed ' + r.currentValue));
+            this.calc_values();
+            //MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+            MathJax.Hub.Typeset();
+
+
+       // MathJax.Hub.Typeset();
+        // setTimeout(() => {
+        //   console.log('finished loading');
+        //   MathJax.Hub.Typeset();
+        //   //MathJax.Hub.Queue(["Typeset",MathJax.Hub])
+        //     // run jQuery stuff here
+        // }, 0);
+
 		} else {
             this.update();
+            this.calc_values();
+
 			console.log('nothing changed');
 		}
 	}
 
-    ngOnChanges(changes: { [propKey: string]: SimpleChange }) {
-        this.update();
-        console.log('CHECK Parameters',this.p);
+    // ngOnChanges(changes: { [propKey: string]: SimpleChange }) {
+    //     this.update();
+    //     this.calc_values();
 
-        // this.data = [];
-        // for (var j = 0; j < this.values.length; j++) {
-        //     this.data.push(this.values[j].close);
-        // }
-        // this.datalength = this.values.length;
-         console.log('changes',changes);
-        // for (let propName in changes) {
-        //     console.log('changes',changes);
-        // // let changedProp = changes[propName];
-        // // let from = JSON.stringify(changedProp.previousValue);
-        // // let to =   JSON.stringify(changedProp.currentValue);
-        // // log.push( `${propName} changed from ${from} to ${to}`);
-        // }
-    }
+    //     console.log('CHECK Parameters',this.p);
+
+    //     // this.data = [];
+    //     // for (var j = 0; j < this.values.length; j++) {
+    //     //     this.data.push(this.values[j].close);
+    //     // }
+    //     // this.datalength = this.values.length;
+    //      console.log('changes',changes);
+    //     // for (let propName in changes) {
+    //     //     console.log('changes',changes);
+    //     // // let changedProp = changes[propName];
+    //     // // let from = JSON.stringify(changedProp.previousValue);
+    //     // // let to =   JSON.stringify(changedProp.currentValue);
+    //     // // log.push( `${propName} changed from ${from} to ${to}`);
+    //     // }
+    // }
 
 
     update() {
@@ -182,7 +246,7 @@ export class BinominalmodelComponent implements OnInit {
                     .attr("y", targetY + 4)
                     .style("text-anchor", "end")
                     .style("font-size", "12px")
-                    .text("p");
+                    .text("q");
                 targetY = rootYoffset - vOffset * i + (2 * vOffset) * j + vOffset;
                 svg.append("line")
                     .attr("x1", targetX)
@@ -203,7 +267,7 @@ export class BinominalmodelComponent implements OnInit {
                     .attr("y", targetY + 2)
                     .style("text-anchor", "end")
                     .style("font-size", "12px")
-                    .text("1-p");
+                    .text("1-q");
             }
         }
 
