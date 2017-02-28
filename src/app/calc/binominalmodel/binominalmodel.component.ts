@@ -1,4 +1,5 @@
-import { Component, OnInit, Input, OnChanges, SimpleChange, DoCheck, KeyValueDiffers, NgZone, ChangeDetectorRef,ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, Input, OnChanges, SimpleChange, DoCheck, KeyValueDiffers, ChangeDetectorRef,ChangeDetectionStrategy } from '@angular/core';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { BinTree } from "../models/bintree";
 import { Parameters } from "../models/parameters";
 

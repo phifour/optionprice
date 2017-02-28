@@ -114,13 +114,18 @@ declare var d3:any;
 </div>
 </div>
 
-  <app-plotfunction [(values)]="data"></app-plotfunction>
 
-  <app-histogram [(title)]="option.type" [(values)]="satt"></app-histogram>
   
   </div>
   `
 })
+
+
+  // <app-histogram [(title)]="option.type" [(values)]="satt"></app-histogram>
+
+
+  // <app-plotfunction [(values)]="data"></app-plotfunction>
+
 
 export class MontecarloComponent {
 
