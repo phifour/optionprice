@@ -2,6 +2,7 @@ import { Component, OnInit, Input, OnChanges, SimpleChange, DoCheck, KeyValueDif
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { BinTree } from "../models/bintree";
 import { Parameters } from "../models/parameters";
+import { BSPrice } from '../models/bsprice';
 
 declare var math:any; // Magic
 declare var MathJax:any;
@@ -10,34 +11,41 @@ declare var d3:any;
 @Component({
     selector: 'app-binominaltree',
     template: `
-    <h2>{{callprice}} = {{price}}</h2>
+    <h3>{{callprice}} = {{price}}</h3>
  
-  <table class="table table-striped">
+    <div class="checkbox">
+    <label>
+        <input type="checkbox" data-toggle="toggle"  [(ngModel)]="showparameters">
+        Show derived parameters
+    </label>
+    </div>
+
+  <table *ngIf="showparameters" class="table table-striped">
     <tbody>
       <tr>
-        <td><h2> $ {{tex_q}} $ </h2></td>
-        <td><h2>{{q}}</h2></td>
+        <td><h3> $ {{tex_q}} $ </h3></td>
+        <td><h3>{{q}}</h3></td>
       </tr>
 
       <tr>
-        <td><h2>{{tex_up}}</h2></td>
-        <td><h2>{{up}}</h2></td>
+        <td><h3>{{tex_up}}</h3></td>
+        <td><h3>{{up}}</h3></td>
       </tr>
 
       <tr>
-        <td><h2>{{tex_down}}</h2></td>
-        <td><h2>{{down}}</h2></td>
+        <td><h3>{{tex_down}}</h3></td>
+        <td><h3>{{down}}</h3></td>
       </tr>
 
       <tr>
-        <td><h2>{{tex_delta_t}}</h2></td>
-        <td><h2>{{delta_t}}</h2></td>
+        <td><h3>{{tex_delta_t}}</h3></td>
+        <td><h3>{{delta_t}}</h3></td>
       </tr>
 
 
       <tr>
-        <td><h2>{{callprice}}</h2></td>
-        <td><h2>{{price}}</h2></td>
+        <td><h3>{{callprice}}</h3></td>
+        <td><h3>{{price}}</h3></td>
       </tr>
 
     </tbody>
@@ -60,7 +68,7 @@ declare var d3:any;
 export class BinominalmodelComponent implements OnInit {
 
     @Input() p: Parameters;
-
+    showparameters:boolean;
 	differ: any;
     // changeDetectorRefs:ChangeDetectorRef[] = [];
 
@@ -79,7 +87,7 @@ export class BinominalmodelComponent implements OnInit {
     up:number;
     tex_up:string="$u=e^{\\sigma \\sqrt{t} }$";
     down:number;
-    tex_down:string="$u=e^{-\\sigma \\sqrt{t} }$";
+    tex_down:string="$d=e^{-\\sigma \\sqrt{t} }$";
     delta_t:number;
 
 

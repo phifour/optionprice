@@ -18,7 +18,7 @@ import { AboutComponent } from '../shared/about/about.component';
   declarations: [
     AppComponent,
     HeaderComponent,
-    AboutComponent
+    AboutComponent    
   ],
   imports: [
     BrowserModule,

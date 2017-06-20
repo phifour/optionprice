@@ -5,11 +5,11 @@ declare var math:any; // Magic
 
 export class BSPrice {
 
-    public o:Option;
+    // public o:Option;
 
-    constructor(opt:Option) {
-        this.o = opt;
-    }
+    // constructor(opt:Option) {
+    //     this.o = opt;
+    // }
 
 
     d1(S0:number, K:number, r:number, sigma:number, T:number) {

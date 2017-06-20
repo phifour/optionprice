@@ -1,14 +1,19 @@
-import { Component, OnInit, ViewChild, ElementRef, Input } from '@angular/core';
+//import { Component, OnInit, ViewChild, ElementRef, Input } from '@angular/core';
+import { Component, OnInit, Input, OnChanges, SimpleChange, DoCheck, KeyValueDiffers, ChangeDetectorRef,ChangeDetectionStrategy } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { Option } from "../models/option";
 import { BSPrice } from "../models/bsprice";
 import { MonteCarlo } from "../models/montecarlo";
 import { PlotfunctionComponent } from "../plotfunction/plotfunction.component";
 import { HistogramComponent } from "../histogram/histogram.component";
+import { CSVExporter } from "../../tools/csvexporter";
 
 declare var math:any; // Magic
 declare var MathJax:any;
 declare var d3:any;
+
+// <option value="asiancall">Asian Call</option>
+// <option value="asianput">Asian Put</option>
 
 @Component({
   selector: 'app-assignmentlist',
@@ -21,8 +26,7 @@ declare var d3:any;
       <select aria-label="Search by type" class="form-control" [(ngModel)]="option.type" id="optiontype">
         <option value="eurocall">European Call</option>
         <option value="europut">European Put</option>
-        <option value="asiancall">Asian Call</option>
-        <option value="asianput">Asian Put</option>
+
       </select>
       </div>
   </div>
@@ -47,7 +51,13 @@ declare var d3:any;
   <label for="example-text-input" class="col-xs-2 col-form-label">Annual interest rate</label>
   <div class="col-xs-10">
   <input class="form-control" type="number" name="myDecimal" [(ngModel)]="option.r" placeholder="Decimal" step="0.01" />
+    <div class="alert alert-danger" *ngIf="option.r <=0">
+    <strong>Danger!</strong> Indicates a dangerous or potentially negative action.
   </div>
+
+  </div>
+
+
 </div>
 
 <div class="form-group row">
@@ -84,9 +94,33 @@ declare var d3:any;
     <input class="form-control" type="number" [(ngModel)]="Nsteps" id="example-number-input">
   </div>
 </div>
+
+
+
+<div class="well">
+<div class="form-group row">
+  <label for="example-number-input" class="col-xs-2 col-form-label">Call Price</label>
+  <div class="col-xs-10">
+    {{current_bs_price}}
+  </div>
+</div>
+<div class="form-group row">
+  <label for="example-number-input" class="col-xs-2 col-form-label">Put Price</label>
+  <div class="col-xs-10">
+    {{current_bs_price}}
+  </div>
+</div>
+</div>
+
+
+
+
 <br>
 <button type="button" (click)="rerun()" class="btn btn-primary btn-block">Price Option</button>
 <br>
+
+<h1>{{current_bs_price}}</h1>
+
 <div *ngIf="showresults" >
 <div class="well">
 <h5>Results of Estimation</h5>
@@ -108,28 +142,37 @@ declare var d3:any;
   </tbody>
 </table>
 
-<br>
-<button type="button" (click)="downloadresults()" class="btn btn-primary btn-block">Download {{filename}}</button>
-<br>
-</div>
+<div *ngIf="data.length > 0">
+  <app-plotfunction [(values)]="data"></app-plotfunction>
 </div>
 
+<app-histogram [(title)]="option.type" [(values)]="satt"></app-histogram>
 
+
+    <br>
+      <button type="button" (click)="downloadresults()" class="btn btn-primary btn-block">Download {{filename}}</button>
+    <br>
+</div>
+</div>
   
-  </div>
+</div>
   `
 })
 
 
-  // <app-histogram [(title)]="option.type" [(values)]="satt"></app-histogram>
+  // 
 
 
-  // <app-plotfunction [(values)]="data"></app-plotfunction>
-
+  //
 
 export class MontecarloComponent {
 
- constructor(private router: Router) {
+
+differ: any;
+
+ constructor(private router: Router, private differs: KeyValueDiffers) {
+   		this.differ = differs.find({}).create(null);
+
   }
 
  id:number;
@@ -146,8 +189,12 @@ export class MontecarloComponent {
  option_payoffs:any;
  showresults:boolean;
  filename:string;
+ csvexporter:CSVExporter;
+ current_bs_price:number;
 
+ 
   ngOnInit() {
+    this.csvexporter = new CSVExporter();
     this.showresults = false;
     this.Nsteps = 200;
     this.option = new Option('eurocall',0.3,0.1,100,110);
@@ -155,7 +202,8 @@ export class MontecarloComponent {
     this.result = {price:100};
     this.data = [];
     this.bs_price = 0;
-    this.bsprice = new BSPrice(this.option);
+    this.bsprice = new BSPrice();//this.option
+
     this.option_payoffs = {
       eurocall:{formular:'max(0,S-K)',
       fcn:
@@ -178,59 +226,23 @@ export class MontecarloComponent {
     };
   }
 
+	ngDoCheck() {
+		var changes = this.differ.diff(this.option);
+
+		if(changes) {
+			console.log('changes detected');
+      this.current_bs_price = math.round(this.bsprice.EuropeanCall(this.option.S0,this.option.K,this.option.r,this.option.volatility,1),3);
 
 
- exportToCsv(filename, rows) {
-        var processRow = function (row) {
-            var finalVal = '';
-            for (var j = 0; j < row.length; j++) {
-                console.log('row',row[j]);
-                // var innerValue = row[j] === null ? '' : row[j].toString();
-                // if (row[j] instanceof Date) {
-                //     innerValue = row[j].toLocaleString();
-                // };
-                // var result = innerValue.replace(/"/g, '""');
-                // if (result.search(/("|,|\n)/g) >= 0) {
-                //     result = '"' + result + '"';}
-                // if (j > 0) {
-                //     finalVal += ',';
-                // finalVal += result;}
-                // var innerValue = row[j] === null ? '' : row[j].toString();
-                // if (row[j] instanceof Date) {
-                //     innerValue = row[j].toLocaleString();
-                // };
-                if (j > 0) {
-                  finalVal = finalVal + ';' + row[j];
-                } else {
-                  finalVal = row[j];
-                }
+			//changes.forEachChangedItem(r => console.log('changed ', r.currentValue));
+			//changes.forEachAddedItem(r => console.log('added ' + r.currentValue));
+			//changes.forEachRemovedItem(r => console.log('removed ' + r.currentValue));
+      //this.calc_values();
+		} else {
+			console.log('nothing changed');
+		}
+	}
 
-            }
-            return finalVal + '\n';
-        };
-
-        var csvFile = '';
-        for (var i = 0; i < rows.length; i++) {
-            csvFile = csvFile + processRow(rows[i]);
-        }
-
-        var blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
-        if (navigator.msSaveBlob) { // IE 10+
-            navigator.msSaveBlob(blob, filename);
-        } else {
-            var link = document.createElement("a");
-            if (link.download !== undefined) { // feature detection
-                // Browsers that support HTML5 download attribute
-                var url = URL.createObjectURL(blob);
-                link.setAttribute("href", url);
-                link.setAttribute("download", filename);
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
-        }
-    }
 
 setcomma(x) {
   var newx = '' + x;
@@ -238,7 +250,7 @@ setcomma(x) {
 }
 
 downloadresults() {
-  this.exportToCsv(this.filename, [
+  this.csvexporter.exportToCsv(this.filename, [
   ['Option type', this.option.type],	
   ['S0', this.setcomma(math.round(this.option.S0 ,3))],	
   ['Strike', this.setcomma(math.round(this.option.K ,3))],	

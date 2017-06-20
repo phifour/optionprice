@@ -18,25 +18,29 @@ declare var d3:any;
 //   <button type="submit" [disabled]="!isFormValid" id="save-button">Submit</button>
 // </form>
 
+
+
+
 @Component({
   selector: 'app-binpricing',
   template: `
 
 
   <div class="container">
+
+
   <h2>Binominal Pricing Model for N = {{para.N}}</h2>
-   
 
+  <app-binominaltree [(p)]="para"></app-binominaltree>
 
-
+  
   <div class="form-group row">
     <label for="example-text-input" class="col-xs-2 col-form-label">Steps</label>
     <div class="col-xs-10">
-    <input class="form-control" type="number" name="myDecimal" [(ngModel)]="para.N" placeholder="Decimal" step="1" min="1" max="10"/>
-    <div *ngIf="para.N>4" class="alert alert-danger">Falue too high</div>
+      <input class="form-control" type="number" name="myDecimal" [(ngModel)]="para.N" placeholder="Decimal" step="1" min="1" max="10"/>
+      <div *ngIf="para.N>4" class="alert alert-danger">Falue too high</div>
     </div>      
   </div>
-
 
 
     <div class="form-group row">
@@ -108,7 +112,11 @@ declare var d3:any;
       </div>
   </div>
 
-  <app-binominaltree [(p)]="para"></app-binominaltree>
+
+
+  <button type="button" (click)="priceoption()" class="btn btn-primary btn-block">Price Option</button>
+
+
 
   </div>
   
@@ -122,6 +130,7 @@ export class BinominalPricingComponent {
   form : FormGroup;
   para:Parameters;
   differ: any;
+  bsprice:BSPrice;
 
 	// constructor(private router: Router, private differs: KeyValueDiffers) {
 	// 	this.differ = differs.find({}).create(null);
@@ -136,13 +145,6 @@ export class BinominalPricingComponent {
 
 
   constructor(private router: Router, private differs: KeyValueDiffers) {
-
-
-
-
-
-
-
     // this.complexForm = fb.group({
     //   'firstName' : [null, Validators.required],
     //   'lastName': [null,  Validators.compose([Validators.required, Validators.minLength(5), Validators.maxLength(10)])],
@@ -154,6 +156,7 @@ export class BinominalPricingComponent {
     // this.complexForm.valueChanges.subscribe( (form: any) => {
     //   console.log('form changed to2:', form);
     // });
+    this.bsprice = new BSPrice();
     this.differ = differs.find({}).create(null);
   }
 
@@ -163,8 +166,7 @@ export class BinominalPricingComponent {
   }
 
 
-  ngOnInit() {
-    
+  ngOnInit() {    
     this.para = new Parameters();
     this.para.S0 = 100;
     this.para.K = 110;
@@ -176,6 +178,12 @@ export class BinominalPricingComponent {
     this.para.UOM = "year";
     this.para.view = "P101";
   }
+
+  priceoption() {
+    console.log('Price Option!', this.bsprice.EuropeanCall(this.para.S0, this.para.K, this.para.r, this.para.sigma, this.para.T));
+  }
+
+
 
 }
 

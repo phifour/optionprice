@@ -65,7 +65,7 @@ export class PlotfunctionComponent implements OnInit {
             height = 270 - margin.top - margin.bottom;
 
         // Parse the date / time
-        var parseDate = d3.time.format("%d-%b-%y").parse;
+        // var parseDate = d3.time.format("%d-%b-%y").parse;
 
         var ymin = d3.min(data, function (d) { return d.close; });
         var ymax = d3.max(data, function (d) { return d.close; });
