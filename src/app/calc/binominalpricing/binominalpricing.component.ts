@@ -180,7 +180,7 @@ export class BinominalPricingComponent {
   }
 
   priceoption() {
-    console.log('Price Option!', this.bsprice.EuropeanCall(this.para.S0, this.para.K, this.para.r, this.para.sigma, this.para.T));
+    console.log('Price Option!', this.bsprice.EuropeanCallPut(this.para.S0, this.para.K, this.para.r, this.para.sigma, this.para.T));
   }
 
 

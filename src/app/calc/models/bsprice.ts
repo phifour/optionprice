@@ -24,9 +24,12 @@ export class BSPrice {
         return  part1/part2; 
     }
 
-    EuropeanCall(S0:number, K:number, r:number, sigma:number, T:number) {
-        var res = S0 * math.erf(this.d1(S0, K, r, sigma, T)) - K * math.exp(-r * T) * math.erf(this.d2(S0, K, r, sigma, T));
-        return res;
+    EuropeanCallPut(S0:number, K:number, r:number, sigma:number, T:number) {
+        var erfd1 = math.erf(this.d1(S0, K, r, sigma, (T/365)));
+        var erfd2 = math.erf(this.d2(S0, K, r, sigma, (T/365)));
+        var call = S0 * erfd1 - K * math.exp(-r * (T/365)) * erfd2;
+        var put = S0 * erfd1 + K * math.exp(-r * (T/365)) * erfd2;
+        return {call:call,put:put,erfd1:erfd1,erfd2:erfd2};
     }
     
     // BlackScholes(type,S0, K, r, sigma, T):

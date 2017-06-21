@@ -31,14 +31,10 @@ declare var d3:any;
       </div>
   </div>
 
-<div class="well">  
   <div class="form-group row">
-    <label for="optpayoff" class="col-xs-2 col-form-label"><h5>Option Payoff</h5></label>
-  <div class="col-xs-10">
-    <h5>{{option_payoffs[option.type].formular}}</h5>
+    <label for="optpayoff" class="col-xs-2 col-form-label">Option Payoff</label>
+    <div class="col-xs-10">{{option_payoffs[option.type].formular}}</div>
   </div>
-  </div>
-</div>
 
 <div class="form-group row">
   <label for="example-text-input" class="col-xs-2 col-form-label">Volatility</label>
@@ -74,46 +70,60 @@ declare var d3:any;
   </div>
 </div>
 
-<div class="form-group row">
+  <!--<div class="form-group row">
   <label for="steps-number-input" class="col-xs-2 col-form-label">Steps</label>
   <div class="col-xs-10">
     <input class="form-control" type="number" [(ngModel)]="option.N" id="steps-number-input">
   </div>
-</div>
+</div>-->
 
 <div class="form-group row">
   <label for="example-number-input" class="col-xs-2 col-form-label">Days to maturity</label>
   <div class="col-xs-10">
-    <input class="form-control" type="number" value="180" id="example-number-input">
+    <input class="form-control" type="number" [(ngModel)]="option.T" id="example-number-input">
   </div>
 </div>
 
-<div class="form-group row">
+ <!--<div class="form-group row">
   <label for="example-number-input" class="col-xs-2 col-form-label">Number of Monte Carlo simulations</label>
   <div class="col-xs-10">
     <input class="form-control" type="number" [(ngModel)]="Nsteps" id="example-number-input">
   </div>
-</div>
-
-
+</div>-->
 
 <div class="well">
 <div class="form-group row">
   <label for="example-number-input" class="col-xs-2 col-form-label">Call Price</label>
   <div class="col-xs-10">
-    {{current_bs_price}}
+    {{current_bs_price.call}}
   </div>
 </div>
 <div class="form-group row">
   <label for="example-number-input" class="col-xs-2 col-form-label">Put Price</label>
   <div class="col-xs-10">
-    {{current_bs_price}}
+    {{current_bs_price.put}}
   </div>
 </div>
+
+<div class="form-group row">
+  <label for="example-number-input" class="col-xs-2 col-form-label">Erf(d1)</label>
+  <div class="col-xs-10">
+    {{current_bs_price.erfd1}}
+  </div>
+</div>
+
+<div class="form-group row">
+  <label for="example-number-input" class="col-xs-2 col-form-label">Erf(d2)</label>
+  <div class="col-xs-10">
+    {{current_bs_price.erfd2}}
+  </div>
 </div>
 
 
+<button type="button" (click)="downloadresults2()" class="btn btn-primary btn-block">Download</button>
 
+
+</div>
 
 <br>
 <button type="button" (click)="rerun()" class="btn btn-primary btn-block">Price Option</button>
@@ -148,10 +158,10 @@ declare var d3:any;
 
 <app-histogram [(title)]="option.type" [(values)]="satt"></app-histogram>
 
-
-    <br>
+<br>
       <button type="button" (click)="downloadresults()" class="btn btn-primary btn-block">Download {{filename}}</button>
-    <br>
+<br>
+
 </div>
 </div>
   
@@ -190,14 +200,14 @@ differ: any;
  showresults:boolean;
  filename:string;
  csvexporter:CSVExporter;
- current_bs_price:number;
+ current_bs_price:any;
 
  
   ngOnInit() {
     this.csvexporter = new CSVExporter();
     this.showresults = false;
     this.Nsteps = 200;
-    this.option = new Option('eurocall',0.3,0.1,100,110);
+    this.option = new Option('eurocall',0.3,0.1,100,110,180);
     this.satt = [1,2,3];
     this.result = {price:100};
     this.data = [];
@@ -231,9 +241,7 @@ differ: any;
 
 		if(changes) {
 			console.log('changes detected');
-      this.current_bs_price = math.round(this.bsprice.EuropeanCall(this.option.S0,this.option.K,this.option.r,this.option.volatility,1),3);
-
-
+      this.current_bs_price = this.bsprice.EuropeanCallPut(this.option.S0,this.option.K,this.option.r,this.option.volatility,this.option.T);
 			//changes.forEachChangedItem(r => console.log('changed ', r.currentValue));
 			//changes.forEachAddedItem(r => console.log('added ' + r.currentValue));
 			//changes.forEachRemovedItem(r => console.log('removed ' + r.currentValue));
@@ -262,6 +270,26 @@ downloadresults() {
   ]);
 }
 
+downloadresults2() {
+  this.csvexporter.exportToCsv('BlackScholesPrice.csv', [
+  ['Option type', this.option.type],	
+  ['S0', this.setcomma(math.round(this.option.S0 ,3))],	
+  ['Strike', this.setcomma(math.round(this.option.K ,3))],	
+  ['Interest rate' , (''+math.round(this.option.r ,3)).replace(".", ",")],	
+  ['Volatility', (''+math.round(this.option.volatility,3)).replace(".", ",")],	
+  ['Call Price', this.setcomma(math.round(this.current_bs_price.call ,3))],
+  ['Put Price', this.setcomma(math.round(this.current_bs_price.put ,3))]	
+  ]);
+}
+
+
+
+
+
+
+
+
+
   rerun() {
     var d = new Date();
     this.filename = 'result_' + d.toDateString() + ".csv";
@@ -272,8 +300,8 @@ downloadresults() {
     console.log('Data for plotting', this.data);
     console.log('option',this.option);
     this.result = this.mc.priceOption(1,50,this.Nsteps,abc);
-    console.log('Price European Call ',this.bsprice.EuropeanCall(this.option.S0,this.option.r,this.option.K,this.option.volatility,1));
-    this.result.BSPrice = this.bsprice.EuropeanCall(this.option.S0,this.option.K,this.option.r,this.option.volatility,1);
+    console.log('Price European Call ',this.bsprice.EuropeanCallPut(this.option.S0,this.option.r,this.option.K,this.option.volatility,1));
+    this.result.BSPrice = this.bsprice.EuropeanCallPut(this.option.S0,this.option.K,this.option.r,this.option.volatility,1);
     
     function abc(x) {
       if(x > 100) {
