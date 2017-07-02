@@ -8,14 +8,18 @@ declare var d3:any;
 @Component({
     selector: 'app-plotfunction',
     template: `
-    <h5>{{title}}</h5>
-    <div id="plotscreen"></div>
-    <div *ngIf="datalength < 1">
-        <h5>No data to plot</h5>
+    <div class="container">
+        <h5>{{title}}</h5>
+        <div id="plotscreen"></div>
+        <div *ngIf="datalength < 1">
+            <h5>No data to plot</h5>
+        </div>
+        <h5>{{datalength}}</h5>
     </div>
-    <h5>{{datalength}}</h5>
-  `
+  `,
+    styleUrls: ['./plotfunction.component.css']
 })
+
 
     // <div *ngIf="values.length > 0" id="plotscreen"></div>
     // <div *ngIf="values.length < 1">
@@ -23,13 +27,15 @@ declare var d3:any;
     // </div>
     //    <div id="plotscreen"></div>
 
-
-
 export class PlotfunctionComponent implements OnInit {
 
     @Input() values: any;
     @Input() title: string;
     @Input() usedates: number;
+    @Input() height: number;
+    @Input() width: number;
+
+
     data: number[];
     datalength:number = 0;
 
@@ -61,23 +67,35 @@ export class PlotfunctionComponent implements OnInit {
         d3.select("#plotscreen").selectAll("*").remove();
         
         var margin = { top: 30, right: 20, bottom: 30, left: 50 },
-            width = 600 - margin.left - margin.right,
-            height = 270 - margin.top - margin.bottom;
+            width = this.width - margin.left - margin.right,
+            height = this.height - margin.top - margin.bottom;
 
         // Parse the date / time
         // var parseDate = d3.time.format("%d-%b-%y").parse;
 
-        var ymin = d3.min(data, function (d) { return d.close; });
-        var ymax = d3.max(data, function (d) { return d.close; });
+        var all_ymin = data[0];
+        var all_ymax = data[0];
 
-        var xmin = d3.min(data, function (d) { return d.date; });
-        var xmax = d3.max(data, function (d) { return d.date; });
+        data.forEach(function(d) {
+        
+        if (d.close < all_ymin.close ) { all_ymin = d; }
+        if (d.close > all_ymax.close ) { all_ymax = d; }
+
+        
+    })
+
+
+
+
+        var ymin = d3.min(all_ymin, function (d) { return d.close; });
+        var ymax = d3.max(all_ymax, function (d) { return d.close; });
+
+        var xmin = d3.min(data[0], function (d) { return d.date; });
+        var xmax = d3.max(data[0], function (d) { return d.date; });
 
 
       //x.domain([0, d3.max(data, function (d) { return d.date; })]);
             //y.domain([0, d3.max(data, function (d) { return d.close; })]);
-
-        console.log('values for plotting',this.values);
 
         // Set the ranges
         //var x = d3.time.scale()
@@ -96,12 +114,11 @@ export class PlotfunctionComponent implements OnInit {
         var yAxis = d3.svg.axis().scale(y)
             .orient("left").ticks(5);
 
-        // Define the line
-        var valueline = d3.svg.line()
-            .x(function (d) { return x(d.date); })
-            .y(function (d) { return y(d.close); });
 
-        // Adds the svg canvas
+
+
+
+  // Adds the svg canvas
         var svg = d3.select("#plotscreen")
             .append("svg")
             .attr("width", width + margin.left + margin.right)
@@ -110,10 +127,33 @@ export class PlotfunctionComponent implements OnInit {
             .attr("transform",
             "translate(" + margin.left + "," + margin.top + ")");
 
+
+        var cnt = 0;
+        data.forEach(function(d) {
+                // console.log(d);
+        // Define the line
+                var valueline = d3.svg.line()
+                    .x(function (d) { return x(d.date); })
+                    .y(function (d) { return y(d.close); });
+
+
+            var r = Math.floor((Math.random() * 255) + 1);
+            var g = Math.floor((Math.random() * 255) + 1);
+            var b = Math.floor((Math.random() * 255) + 1);
+
+
             // Add the valueline path.
             svg.append("path")
                 .attr("class", "line")
-                .attr("d", valueline(data));
+                .attr("d", valueline(d))//
+                .attr("stroke", d3.rgb(r, g, b))
+                .attr("stroke-width", 1)
+                .attr("fill", "none");
+            cnt++;
+            
+            });
+
+
 
             // Add the X Axis
             svg.append("g")
@@ -128,7 +168,7 @@ export class PlotfunctionComponent implements OnInit {
 
 
    // now add titles to the axes
-        var padding = 50; 
+        var padding = -20; 
         svg.append("text")
             .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
             .attr("transform", "translate("+ (padding/2) +","+(height/2)+")rotate(-90)")  // text is drawn off the screen top left, move down and out and rotate

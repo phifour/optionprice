@@ -52,6 +52,7 @@ export class MonteCarlo {
     return sum;
     }
 
+
     public geoBrownian_series(T:number, N:number) {
     var h = T/N;
     var sqrth = Math.sqrt(h);
@@ -69,6 +70,15 @@ export class MonteCarlo {
     return series;
     }
 
+
+    public geoBrownian_multi_series(T:number, N:number,nsim:number) {
+        var tractory = [];
+        for (var i=0;i<nsim-1;i++) {
+            tractory.push(this.geoBrownian_series(T, N))
+        }
+        return tractory;
+    }
+
     public max(input:number) {
         if (input < 0) {
             return 0;
@@ -76,7 +86,36 @@ export class MonteCarlo {
             return input;
         }
     }
-        
+
+
+
+
+    public MCpriceOption(T:number, N:number,nsim:number) {
+        var trajectories = this.geoBrownian_multi_series(T,N,nsim);
+        var est_price = -1;
+        var lastprice = [];
+
+         for (var i=0;i< trajectories.length;i++) {
+            var di = trajectories[i];
+            var val = di[di.length-1].close - 100;
+            est_price = est_price + val;
+            lastprice.push(val);
+    }
+
+        est_price = est_price/nsim;
+
+        return est_price;
+    }
+
+
+
+
+
+
+
+
+
+
     public MonteCarlo(T:number, N:number, Nsteps:number, payoff:any) {
         var profit = [];
         for (var i=0;i<Nsteps;i++) {

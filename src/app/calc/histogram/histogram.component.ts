@@ -4,14 +4,21 @@ declare var math:any; // Magic
 declare var MathJax:any;
 declare var d3:any;
 
+
+    // <div *ngIf="values.length > 0" id="histogram"></div>
+    // <div *ngIf="values.length < 1">
+    //     <h5>No data for histogram</h5>
+    // </div>
+
+
+
+
 @Component({
     selector: 'app-histogram',
     template: `
     <h5> {{title}} </h5>
-    <div *ngIf="values.length > 0" id="histogram"></div>
-    <div *ngIf="values.length < 1">
-        <h5>No data for histogram</h5>
-    </div>
+    <div id="histogram"></div>
+
   `,
    styles: [`
         body {
@@ -39,13 +46,14 @@ export class HistogramComponent implements OnInit {
     // @Input() usedates: number;
     @Input() title: string;
     @Input() values: number[];
-
+    @Input() height: number;
+    @Input() width: number;
 
     ngOnChanges(changes: {[propKey: string]: SimpleChange}) {
         let log: string[] = [];
         this.update();
         this.initgraph();
-        console.log('changes in histogram',changes);
+        // console.log('changes in histogram',changes);
         // for (let propName in changes) {
         //     console.log('changes',changes);
         // // let changedProp = changes[propName];
@@ -70,8 +78,8 @@ export class HistogramComponent implements OnInit {
             // A formatter for counts.
             var formatCount = d3.format(",.0f");
 
-            var w = 480;
-            var h = 250;
+            var w = this.width;
+            var h = this.height;
 
             var margin = {top: 20, right: 30, bottom: 30, left: 30};
             var width = w - margin.left - margin.right;
@@ -134,7 +142,9 @@ export class HistogramComponent implements OnInit {
     }
 
     ngOnInit() {
+         d3.select("#histogram").selectAll("*").remove();
          this.initgraph();
+         console.log("vales",this.values);
          //this.title = "Hello World!";
          //this.update();
     }

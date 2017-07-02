@@ -19,8 +19,6 @@ declare var d3:any;
 // </form>
 
 
-
-
 @Component({
   selector: 'app-binpricing',
   template: `
@@ -166,7 +164,9 @@ export class BinominalPricingComponent {
   }
 
 
-  ngOnInit() {    
+  ngOnInit() {
+    // MathJax.Hub.Typeset();
+    console.log("calling ngOnInit");
     this.para = new Parameters();
     this.para.S0 = 100;
     this.para.K = 110;

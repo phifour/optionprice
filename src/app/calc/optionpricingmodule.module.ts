@@ -7,6 +7,7 @@ import { MontecarloComponent } from './montecarlo/montecarlo.component';
 import { HistogramComponent } from './histogram/histogram.component';
 import { PlotfunctionComponent } from './plotfunction/plotfunction.component';
 import { InputparametersComponent } from './inputparameters/inputparameters.component';
+import { MontecarlopricingComponent } from './montecarlopricing/montecarlopricing.component';
 
 
 
@@ -21,7 +22,8 @@ import { InputparametersComponent } from './inputparameters/inputparameters.comp
     MontecarloComponent,
     HistogramComponent,
     PlotfunctionComponent,
-    InputparametersComponent
+    InputparametersComponent,
+    MontecarlopricingComponent
     ],
   exports: [
     BinominalmodelComponent,

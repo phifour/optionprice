@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, OnChanges, SimpleChange, DoCheck, KeyValueDiffers, ChangeDetectorRef,ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, AfterViewInit, Input, OnChanges, SimpleChange, DoCheck, KeyValueDiffers, ChangeDetectorRef,ChangeDetectionStrategy } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { BinTree } from "../models/bintree";
 import { Parameters } from "../models/parameters";
@@ -73,9 +73,17 @@ export class BinominalmodelComponent implements OnInit {
     // changeDetectorRefs:ChangeDetectorRef[] = [];
 
 	constructor(private differs: KeyValueDiffers) {
+        console.log('calling constructor');
 		this.differ = differs.find({}).create(null);
         this.bintree = new BinTree();
 	}
+
+
+    ngAfterViewInit() {
+        MathJax.Hub.Typeset();
+
+    }
+
 
 
     tex_q:string;
@@ -106,7 +114,6 @@ export class BinominalmodelComponent implements OnInit {
 
         this.calc_values();
         this.update();
-        // MathJax.Hub.Typeset();
         // setTimeout(() => {
         //     console.log('finished loading');
         //   MathJax.Hub.Typeset();
@@ -134,7 +141,7 @@ export class BinominalmodelComponent implements OnInit {
 			changes.forEachRemovedItem(r => console.log('removed ' + r.currentValue));
             this.calc_values();
             //MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
-            MathJax.Hub.Typeset();
+            // MathJax.Hub.Typeset();
 
 
        // MathJax.Hub.Typeset();
@@ -318,9 +325,9 @@ export class BinominalmodelComponent implements OnInit {
                     .attr("dx", 30)
                     .attr("dy", 20)
                     .style("text-anchor", "middle")
-                    .style("font-size", "15px");
+                    .style("font-size", "12px");
                 textbox.append("tspan")
-                    .text(price);
+                    .text("S=" + price);
 
 
                 // if ((i === 0) && (j === 0)) {

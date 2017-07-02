@@ -20,13 +20,12 @@ declare var d3:any;
   template: `
   <div class="container">
 
-  <div class="form-group row">
+    <!--<div class="form-group row">
     <label for="optiontype" class="col-xs-2 col-form-label">Option Type</label>
       <div class="col-xs-10">
       <select aria-label="Search by type" class="form-control" [(ngModel)]="option.type" id="optiontype">
         <option value="eurocall">European Call</option>
         <option value="europut">European Put</option>
-
       </select>
       </div>
   </div>
@@ -34,10 +33,10 @@ declare var d3:any;
   <div class="form-group row">
     <label for="optpayoff" class="col-xs-2 col-form-label">Option Payoff</label>
     <div class="col-xs-10">{{option_payoffs[option.type].formular}}</div>
-  </div>
+  </div>-->
 
 <div class="form-group row">
-  <label for="example-text-input" class="col-xs-2 col-form-label">Volatility</label>
+  <label for="example-text-input" class="col-xs-2 col-form-label">Annual Volatility</label>
   <div class="col-xs-10">
   <input class="form-control" type="number" name="myDecimal"  [(ngModel)]="option.volatility"  placeholder="Decimal" step="0.01" />
   </div>
@@ -106,6 +105,23 @@ declare var d3:any;
 </div>
 
 <div class="form-group row">
+  <label for="example-number-input" class="col-xs-2 col-form-label">Interest rate</label>
+  <div class="col-xs-10">
+    {{option.r*100}}%
+  </div>
+</div>
+
+<div class="form-group row">
+  <label for="example-number-input" class="col-xs-2 col-form-label">Volatility</label>
+  <div class="col-xs-10">
+    {{option.volatility*100}}%
+  </div>
+</div>
+
+
+
+
+<div class="form-group row">
   <label for="example-number-input" class="col-xs-2 col-form-label">Erf(d1)</label>
   <div class="col-xs-10">
     {{current_bs_price.erfd1}}
@@ -120,7 +136,7 @@ declare var d3:any;
 </div>
 
 
-<button type="button" (click)="downloadresults2()" class="btn btn-primary btn-block">Download</button>
+<button type="button" (click)="downloadresults2()" class="btn btn-primary btn-block">Download Results</button>
 
 
 </div>
@@ -128,42 +144,6 @@ declare var d3:any;
 <br>
 <button type="button" (click)="rerun()" class="btn btn-primary btn-block">Price Option</button>
 <br>
-
-<h1>{{current_bs_price}}</h1>
-
-<div *ngIf="showresults" >
-<div class="well">
-<h5>Results of Estimation</h5>
-<table class="table table-inverse">
-  <thead>
-    <tr>
-      <th>Estimated Option price</th>
-      <th>Black Scholes price</th>
-      <th>Number of simulations</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>{{result.price}}</td>
-      <td>{{result.BSPrice}}</td>
-      <td>{{result.Nsteps}}</td>
-    </tr>
-  
-  </tbody>
-</table>
-
-<div *ngIf="data.length > 0">
-  <app-plotfunction [(values)]="data"></app-plotfunction>
-</div>
-
-<app-histogram [(title)]="option.type" [(values)]="satt"></app-histogram>
-
-<br>
-      <button type="button" (click)="downloadresults()" class="btn btn-primary btn-block">Download {{filename}}</button>
-<br>
-
-</div>
-</div>
   
 </div>
   `
@@ -196,7 +176,6 @@ differ: any;
  mc:MonteCarlo;
  satt:number[];
  result:any;
- option_payoffs:any;
  showresults:boolean;
  filename:string;
  csvexporter:CSVExporter;
@@ -214,26 +193,6 @@ differ: any;
     this.bs_price = 0;
     this.bsprice = new BSPrice();//this.option
 
-    this.option_payoffs = {
-      eurocall:{formular:'max(0,S-K)',
-      fcn:
-      function abc(S,K) {
-      if(S > K) {
-        return S - K;
-      } else {
-        return 0;
-      }
-      }},
-      europut:{formular:'max(0,K-S)',
-      fcn:
-      function abc(S,K) {
-      if(S < K) {
-        return K - S;
-      } else {
-        return 0;
-      }
-      }}
-    };
   }
 
 	ngDoCheck() {
@@ -282,14 +241,6 @@ downloadresults2() {
   ]);
 }
 
-
-
-
-
-
-
-
-
   rerun() {
     var d = new Date();
     this.filename = 'result_' + d.toDateString() + ".csv";
@@ -320,3 +271,37 @@ downloadresults2() {
 
 
 }
+
+// <div *ngIf="showresults" >
+// <div class="well">
+//         <h5>Results of Estimation</h5>
+//           <table class="table table-inverse">
+//             <thead>
+//               <tr>
+//                 <th>Estimated Option price</th>
+//                 <th>Black Scholes price</th>
+//                 <th>Number of simulations</th>
+//               </tr>
+//             </thead>
+//             <tbody>
+//               <tr>
+//                 <td>{{result.price}}</td>
+//                 <td>{{result.BSPrice}}</td>
+//                 <td>{{result.Nsteps}}</td>
+//               </tr>
+            
+//             </tbody>
+//           </table>
+
+//     <div *ngIf="data.length > 0">
+//       <app-plotfunction [(values)]="data"></app-plotfunction>
+//     </div>
+
+//   <app-histogram [(title)]="option.type" [(values)]="satt"></app-histogram>
+
+//   <br>
+//         <button type="button" (click)="downloadresults()" class="btn btn-primary btn-block">Download {{filename}}</button>
+//   <br>
+
+// </div>
+// </div>
