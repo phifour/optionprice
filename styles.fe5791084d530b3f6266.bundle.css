@@ -1,4 +1,4 @@
-body{font:12px Arial}.axis line,.axis path{fill:none;stroke:grey;stroke-width:1;shape-rendering:crispEdges}/*!
+form{position:absolute;bottom:10px;left:10px}body{font:12px Arial}.axis{fill:none;stroke:#000;stroke-width:1px}.x.axis line,.y.axis line{stroke:blue}/*!
  * Bootstrap v3.3.7 (http://getbootstrap.com)
  * Copyright 2011-2016 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
